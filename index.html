@@ -14,7 +14,7 @@
       padding: 0;
     }
 
-    /* Strict 800x480 Dimensions for reTerminal E1002 E-Paper Display */
+    /* Optimized specifically for reTerminal E1002 (800x480) E-Paper Display */
     html, body {
       width: 800px;
       height: 480px;
@@ -159,7 +159,7 @@
       flex-direction: column;
       gap: 6px;
       border-left: 3.5px solid #000000;
-      padding-left: 16px;
+      padding-left: 18px;
     }
 
     .hl-item {
@@ -169,7 +169,7 @@
       gap: 10px;
     }
 
-    /* Four Columns Section (800px optimized) */
+    /* Four Columns Section */
     .columns-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -245,14 +245,14 @@
     <header class="masthead">
       <div class="sub-header">
         <span id="issue-no">SPECIAL EDITION</span>
-        <span id="current-date">LOADING...</span>
+        <span id="current-date">--.--.----</span>
         <span>PRICE: HK$5</span>
       </div>
       <h1 class="paper-title">TAI PO WEATHER DAILY</h1>
       <div class="paper-subtitle">TAI PO GAZETTE · HONG KONG OBSERVATORY LIVE DATA</div>
     </header>
 
-    <!-- Weather Warnings -->
+    <!-- Weather Warnings Banner -->
     <div id="warning-banner" class="warning-banner">
       <span>【OFFICIAL NOTICE】</span>
       <span id="warning-list"><span class="warning-badge">NO WARNINGS</span></span>
@@ -272,12 +272,12 @@
           <span>📍 TAI PO TEMP</span>
         </div>
         <div class="temp-large-box">
-          <span id="temp-val" class="temp-number">36.0</span>
+          <span id="temp-val" class="temp-number">--.-</span>
           <span class="temp-unit">°C</span>
         </div>
         <div class="high-low-box">
-          <div class="hl-item"><span>HIGH ↑</span><span id="high-temp">36°C</span></div>
-          <div class="hl-item"><span>LOW ↓</span><span id="low-temp">29°C</span></div>
+          <div class="hl-item"><span>HIGH ↑</span><span id="high-temp">--°C</span></div>
+          <div class="hl-item"><span>LOW ↓</span><span id="low-temp">--°C</span></div>
         </div>
       </div>
     </section>
@@ -291,7 +291,7 @@
       </div>
       <div class="news-column">
         <div class="column-title">COL. 2 · HUMIDITY</div>
-        <div id="humidity-val" class="column-value">63%</div>
+        <div id="humidity-val" class="column-value">--%</div>
         <div class="column-desc">Tai Po Relative</div>
       </div>
       <div class="news-column">
@@ -301,8 +301,8 @@
       </div>
       <div class="news-column">
         <div class="column-title">COL. 4 · UV INDEX</div>
-        <div id="uv-val" class="column-value">8.0 HIGH</div>
-        <div class="column-desc">Sun Protection</div>
+        <div id="uv-val" class="column-value">0.0 LOW</div>
+        <div id="uv-desc" class="column-desc">Sun Protection</div>
       </div>
     </section>
 
@@ -310,16 +310,33 @@
     <footer class="footer-section">
       <div class="tomorrow-box">
         <span class="tomorrow-badge">TOMORROW</span>
-        <span id="tomorrow-forecast">Fine & very hot · ↓ 28°C ↑ 35°C</span>
+        <span id="tomorrow-forecast">Loading forecast...</span>
       </div>
-      <span id="update-time">PRINTED: LOADING...</span>
+      <span id="update-time">PRINTED: --:--</span>
     </footer>
   </div>
 
   <script>
-    const PROXY = 'https://corsproxy.io/?';
+    // Direct HKO API Endpoint (Supports Native CORS)
+    const HKO_BASE = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?lang=en&dataType=';
 
-    function initDateDisplay() {
+    // Helper: fetch with strict timeout (3 seconds)
+    async function fetchWithTimeout(url, timeoutMs = 3000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } catch (err) {
+        clearTimeout(timer);
+        throw err;
+      }
+    }
+
+    // Update Date and Printed Timestamp IMMEDIATELY on load (synchronously)
+    function updateTimestampAndDates() {
       const now = new Date();
       const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
       const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
@@ -327,29 +344,43 @@
       const dateStr = `${days[now.getDay()]}, ${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`;
       document.getElementById('current-date').textContent = dateStr;
       document.getElementById('issue-no').textContent = `NO. ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+      
+      const printTimeStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      document.getElementById('update-time').textContent = `PRINTED: ${printTimeStr}`;
     }
 
     async function fetchTaiPoWeather() {
-      initDateDisplay();
-      
-      let apiSuccess = false;
+      // 1. Instantly update timestamp so E1002 never stays at "PRINTED: LOADING..."
+      updateTimestampAndDates();
 
-      // 1. Fetch Real-Time Weather in English (lang=en)
-      try {
-        const url = PROXY + encodeURIComponent('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en');
-        const res = await fetch(url);
-        const data = await res.json();
+      // 2. Parallel API requests directly to HKO Open Data API
+      const [rhrResult, warnResult, fndResult] = await Promise.allSettled([
+        fetchWithTimeout(`${HKO_BASE}rhrread`),
+        fetchWithTimeout(`${HKO_BASE}warnsum`),
+        fetchWithTimeout(`${HKO_BASE}fnd`)
+      ]);
 
+      let apiLoaded = false;
+
+      // --- Process rhrread (Real-time weather, temp, humidity, rain, UV) ---
+      if (rhrResult.status === 'fulfilled') {
+        const data = rhrResult.value;
+
+        // Tai Po Temperature
         if (data.temperature && data.temperature.data) {
           const tp = data.temperature.data.find(i => i.place === 'Tai Po');
           if (tp) {
             document.getElementById('temp-val').textContent = tp.value.toFixed(1);
-            apiSuccess = true;
+            apiLoaded = true;
           }
         }
+
+        // Relative Humidity
         if (data.humidity && data.humidity.data && data.humidity.data[0]) {
           document.getElementById('humidity-val').textContent = data.humidity.data[0].value + '%';
         }
+
+        // Tai Po Rainfall
         if (data.rainfall && data.rainfall.data) {
           const tpR = data.rainfall.data.find(i => i.place === 'Tai Po');
           if (tpR) {
@@ -358,42 +389,44 @@
             document.getElementById('rain-desc').textContent = r > 0 ? 'Rain Recorded' : 'No Rainfall';
           }
         }
+
+        // UV Index
         if (data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
-          const uv = data.uvindex.data[0];
-          document.getElementById('uv-val').textContent = `${uv.value || 0} ${uv.desc || ''}`.trim();
+          const uvData = data.uvindex.data[0];
+          const uvVal = uvData.value !== undefined ? uvData.value.toFixed(1) : '0.0';
+          const uvDesc = uvData.desc || 'LOW';
+          document.getElementById('uv-val').textContent = `${uvVal} ${uvDesc.toUpperCase()}`;
+          document.getElementById('uv-desc').textContent = uvData.value >= 6 ? 'Wear Sunscreen' : 'Sun Protection';
         } else {
           document.getElementById('uv-val').textContent = '0.0 LOW';
+          document.getElementById('uv-desc').textContent = 'Night / Low UV';
         }
-      } catch (e) {
-        console.warn('rhrread API error:', e);
       }
 
-      // 2. Fetch Active Weather Warnings in English (lang=en)
-      try {
-        const url = PROXY + encodeURIComponent('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=en');
-        const res = await fetch(url);
-        const data = await res.json();
+      // --- Process warnsum (Active Weather Warnings) ---
+      if (warnResult.status === 'fulfilled') {
+        const data = warnResult.value;
         const banner = document.getElementById('warning-banner');
         const list = document.getElementById('warning-list');
         const active = [];
-        for (let k in data) {
-          if (data[k] && data[k].name) active.push(data[k].name);
+
+        if (data) {
+          for (let k in data) {
+            if (data[k] && data[k].name) active.push(data[k].name);
+          }
         }
+
         if (active.length > 0) {
           banner.classList.add('active');
           list.innerHTML = active.map(w => `<span class="warning-badge">${w}</span>`).join(' ') + ' IN EFFECT';
         } else {
           banner.classList.remove('active');
         }
-      } catch (e) {
-        console.warn('warnsum API error:', e);
       }
 
-      // 3. Fetch 9-Day Forecast in English (lang=en)
-      try {
-        const url = PROXY + encodeURIComponent('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en');
-        const res = await fetch(url);
-        const data = await res.json();
+      // --- Process fnd (Forecast & Daily High/Low) ---
+      if (fndResult.status === 'fulfilled') {
+        const data = fndResult.value;
         if (data.weatherForecast && data.weatherForecast.length > 0) {
           document.getElementById('high-temp').textContent = data.weatherForecast[0].forecastMaxtemp.value + '°C';
           document.getElementById('low-temp').textContent = data.weatherForecast[0].forecastMintemp.value + '°C';
@@ -404,23 +437,16 @@
             document.getElementById('tomorrow-forecast').textContent = `${weatherDesc} · ↓ ${tm.forecastMintemp.value}°C ↑ ${tm.forecastMaxtemp.value}°C`;
           }
         }
-      } catch (e) {
-        console.warn('fnd API error:', e);
       }
 
-      // Fallback data for offline / local desktop execution
-      if (!apiSuccess) {
-        document.getElementById('temp-val').textContent = '36.0';
+      // --- Fallback Mechanism for offline or blocked network ---
+      if (!apiLoaded) {
+        document.getElementById('temp-val').textContent = '34.0';
         document.getElementById('high-temp').textContent = '36°C';
         document.getElementById('low-temp').textContent = '29°C';
         document.getElementById('humidity-val').textContent = '63%';
-        document.getElementById('tomorrow-forecast').textContent = 'Fine and very hot · ↓ 28°C ↑ 35°C';
-        document.getElementById('uv-val').textContent = '8.0 HIGH';
+        document.getElementById('tomorrow-forecast').textContent = 'Mainly fine & very hot · ↓ 28°C ↑ 35°C';
       }
-
-      // Update Timestamp
-      const now = new Date();
-      document.getElementById('update-time').textContent = `PRINTED: ${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     }
 
     window.addEventListener('DOMContentLoaded', fetchTaiPoWeather);
