@@ -272,12 +272,12 @@
           <span>📍 TAI PO TEMP</span>
         </div>
         <div class="temp-large-box">
-          <span id="temp-val" class="temp-number">--.-</span>
+          <span id="temp-val" class="temp-number">34.0</span>
           <span class="temp-unit">°C</span>
         </div>
         <div class="high-low-box">
-          <div class="hl-item"><span>HIGH ↑</span><span id="high-temp">--°C</span></div>
-          <div class="hl-item"><span>LOW ↓</span><span id="low-temp">--°C</span></div>
+          <div class="hl-item"><span>HIGH ↑</span><span id="high-temp">36°C</span></div>
+          <div class="hl-item"><span>LOW ↓</span><span id="low-temp">29°C</span></div>
         </div>
       </div>
     </section>
@@ -286,12 +286,12 @@
     <section class="columns-grid">
       <div class="news-column">
         <div class="column-title">COL. 1 · WIND</div>
-        <div id="wind-speed" class="column-value">LIGHT 2-4 km/h</div>
-        <div class="column-desc">Tolo Harbour</div>
+        <div id="wind-speed" class="column-value">6-19 km/h</div>
+        <div id="wind-desc" class="column-desc">S to SE Winds</div>
       </div>
       <div class="news-column">
         <div class="column-title">COL. 2 · HUMIDITY</div>
-        <div id="humidity-val" class="column-value">--%</div>
+        <div id="humidity-val" class="column-value">63%</div>
         <div class="column-desc">Tai Po Relative</div>
       </div>
       <div class="news-column">
@@ -310,146 +310,162 @@
     <footer class="footer-section">
       <div class="tomorrow-box">
         <span class="tomorrow-badge">TOMORROW</span>
-        <span id="tomorrow-forecast">Loading forecast...</span>
+        <span id="tomorrow-forecast">Fine & very hot · ↓ 28°C ↑ 35°C</span>
       </div>
       <span id="update-time">PRINTED: --:--</span>
     </footer>
   </div>
 
   <script>
-    // Direct HKO API Endpoint (Supports Native CORS)
-    const HKO_BASE = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?lang=en&dataType=';
+    // Direct HKO Open Data API
+    var HKO_BASE = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?lang=en&dataType=';
 
-    // Helper: fetch with strict timeout (3 seconds)
-    async function fetchWithTimeout(url, timeoutMs = 3000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timer);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-      } catch (err) {
-        clearTimeout(timer);
-        throw err;
+    // Helper: Convert Beaufort Force to km/h Range
+    function convertBeaufortToKmH(forceStr) {
+      if (!forceStr) return '6-19 km/h';
+      var matches = forceStr.match(/\d+/g);
+      if (matches && matches.length >= 2) {
+        var f1 = parseInt(matches[0], 10);
+        var f2 = parseInt(matches[1], 10);
+        var minKm = f1 === 1 ? 1 : f1 === 2 ? 6 : f1 === 3 ? 12 : f1 === 4 ? 20 : f1 === 5 ? 29 : 39;
+        var maxKm = f2 === 1 ? 5 : f2 === 2 ? 11 : f2 === 3 ? 19 : f2 === 4 ? 28 : f2 === 5 ? 38 : 49;
+        return minKm + '-' + maxKm + ' km/h';
+      } else if (matches && matches.length === 1) {
+        var f = parseInt(matches[0], 10);
+        if (f === 1) return '1-5 km/h';
+        if (f === 2) return '6-11 km/h';
+        if (f === 3) return '12-19 km/h';
+        if (f === 4) return '20-28 km/h';
+        if (f === 5) return '29-38 km/h';
+        return '39+ km/h';
       }
+      return '6-19 km/h';
     }
 
     // Update Date and Printed Timestamp IMMEDIATELY on load (synchronously)
-    function updateTimestampAndDates() {
-      const now = new Date();
-      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+    function initDatesAndTimestamp() {
+      var now = new Date();
+      var months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      var days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
       
-      const dateStr = `${days[now.getDay()]}, ${months[now.getMonth()]} ${String(now.getDate()).padStart(2, '0')}, ${now.getFullYear()}`;
+      var dateStr = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + String(now.getDate()).padStart(2, '0') + ', ' + now.getFullYear();
       document.getElementById('current-date').textContent = dateStr;
-      document.getElementById('issue-no').textContent = `NO. ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
       
-      const printTimeStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      document.getElementById('update-time').textContent = `PRINTED: ${printTimeStr}`;
+      var issueMonth = String(now.getMonth() + 1).padStart(2, '0');
+      var issueDay = String(now.getDate()).padStart(2, '0');
+      document.getElementById('issue-no').textContent = 'NO. ' + now.getFullYear() + issueMonth + issueDay;
+      
+      var printTimeStr = now.getFullYear() + '/' + issueMonth + '/' + issueDay + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('update-time').textContent = 'PRINTED: ' + printTimeStr;
     }
 
-    async function fetchTaiPoWeather() {
-      // 1. Instantly update timestamp so E1002 never stays at "PRINTED: LOADING..."
-      updateTimestampAndDates();
+    function fetchTaiPoWeather() {
+      initDatesAndTimestamp();
 
-      // 2. Parallel API requests directly to HKO Open Data API
-      const [rhrResult, warnResult, fndResult] = await Promise.allSettled([
-        fetchWithTimeout(`${HKO_BASE}rhrread`),
-        fetchWithTimeout(`${HKO_BASE}warnsum`),
-        fetchWithTimeout(`${HKO_BASE}fnd`)
-      ]);
-
-      let apiLoaded = false;
-
-      // --- Process rhrread (Real-time weather, temp, humidity, rain, UV) ---
-      if (rhrResult.status === 'fulfilled') {
-        const data = rhrResult.value;
-
-        // Tai Po Temperature
-        if (data.temperature && data.temperature.data) {
-          const tp = data.temperature.data.find(i => i.place === 'Tai Po');
-          if (tp) {
-            document.getElementById('temp-val').textContent = tp.value.toFixed(1);
-            apiLoaded = true;
+      // Fetch rhrread (Real-time weather)
+      fetch(HKO_BASE + 'rhrread')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.temperature && data.temperature.data) {
+            for (var i = 0; i < data.temperature.data.length; i++) {
+              if (data.temperature.data[i].place === 'Tai Po') {
+                document.getElementById('temp-val').textContent = Number(data.temperature.data[i].value).toFixed(1);
+                break;
+              }
+            }
           }
-        }
-
-        // Relative Humidity
-        if (data.humidity && data.humidity.data && data.humidity.data[0]) {
-          document.getElementById('humidity-val').textContent = data.humidity.data[0].value + '%';
-        }
-
-        // Tai Po Rainfall
-        if (data.rainfall && data.rainfall.data) {
-          const tpR = data.rainfall.data.find(i => i.place === 'Tai Po');
-          if (tpR) {
-            const r = tpR.max || 0;
-            document.getElementById('rainfall-val').textContent = r.toFixed(1) + ' mm';
-            document.getElementById('rain-desc').textContent = r > 0 ? 'Rain Recorded' : 'No Rainfall';
+          if (data && data.humidity && data.humidity.data && data.humidity.data[0]) {
+            document.getElementById('humidity-val').textContent = data.humidity.data[0].value + '%';
           }
-        }
-
-        // UV Index
-        if (data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
-          const uvData = data.uvindex.data[0];
-          const uvVal = uvData.value !== undefined ? uvData.value.toFixed(1) : '0.0';
-          const uvDesc = uvData.desc || 'LOW';
-          document.getElementById('uv-val').textContent = `${uvVal} ${uvDesc.toUpperCase()}`;
-          document.getElementById('uv-desc').textContent = uvData.value >= 6 ? 'Wear Sunscreen' : 'Sun Protection';
-        } else {
-          document.getElementById('uv-val').textContent = '0.0 LOW';
-          document.getElementById('uv-desc').textContent = 'Night / Low UV';
-        }
-      }
-
-      // --- Process warnsum (Active Weather Warnings) ---
-      if (warnResult.status === 'fulfilled') {
-        const data = warnResult.value;
-        const banner = document.getElementById('warning-banner');
-        const list = document.getElementById('warning-list');
-        const active = [];
-
-        if (data) {
-          for (let k in data) {
-            if (data[k] && data[k].name) active.push(data[k].name);
+          if (data && data.rainfall && data.rainfall.data) {
+            for (var j = 0; j < data.rainfall.data.length; j++) {
+              if (data.rainfall.data[j].place === 'Tai Po') {
+                var r = data.rainfall.data[j].max || 0;
+                document.getElementById('rainfall-val').textContent = Number(r).toFixed(1) + ' mm';
+                document.getElementById('rain-desc').textContent = r > 0 ? 'Rain Recorded' : 'No Rainfall';
+                break;
+              }
+            }
           }
-        }
-
-        if (active.length > 0) {
-          banner.classList.add('active');
-          list.innerHTML = active.map(w => `<span class="warning-badge">${w}</span>`).join(' ') + ' IN EFFECT';
-        } else {
-          banner.classList.remove('active');
-        }
-      }
-
-      // --- Process fnd (Forecast & Daily High/Low) ---
-      if (fndResult.status === 'fulfilled') {
-        const data = fndResult.value;
-        if (data.weatherForecast && data.weatherForecast.length > 0) {
-          document.getElementById('high-temp').textContent = data.weatherForecast[0].forecastMaxtemp.value + '°C';
-          document.getElementById('low-temp').textContent = data.weatherForecast[0].forecastMintemp.value + '°C';
-          
-          if (data.weatherForecast.length > 1) {
-            const tm = data.weatherForecast[1];
-            const weatherDesc = (tm.forecastWeather || tm.forecastForecast || 'Fine').replace(/\./g, '');
-            document.getElementById('tomorrow-forecast').textContent = `${weatherDesc} · ↓ ${tm.forecastMintemp.value}°C ↑ ${tm.forecastMaxtemp.value}°C`;
+          if (data && data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
+            var uvVal = data.uvindex.data[0].value !== undefined ? Number(data.uvindex.data[0].value).toFixed(1) : '0.0';
+            var uvDesc = data.uvindex.data[0].desc || 'LOW';
+            document.getElementById('uv-val').textContent = uvVal + ' ' + uvDesc.toUpperCase();
+            document.getElementById('uv-desc').textContent = data.uvindex.data[0].value >= 6 ? 'Wear Sunscreen' : 'Sun Protection';
           }
-        }
-      }
+        })
+        .catch(function(err) {
+          console.warn('rhrread fetch failed:', err);
+        });
 
-      // --- Fallback Mechanism for offline or blocked network ---
-      if (!apiLoaded) {
-        document.getElementById('temp-val').textContent = '34.0';
-        document.getElementById('high-temp').textContent = '36°C';
-        document.getElementById('low-temp').textContent = '29°C';
-        document.getElementById('humidity-val').textContent = '63%';
-        document.getElementById('tomorrow-forecast').textContent = 'Mainly fine & very hot · ↓ 28°C ↑ 35°C';
-      }
+      // Fetch warnsum (Active Weather Warnings)
+      fetch(HKO_BASE + 'warnsum')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var banner = document.getElementById('warning-banner');
+          var list = document.getElementById('warning-list');
+          var active = [];
+          if (data) {
+            for (var key in data) {
+              if (data[key] && data[key].name) {
+                active.push(data[key].name);
+              }
+            }
+          }
+          if (active.length > 0) {
+            banner.classList.add('active');
+            var badgesHtml = '';
+            for (var k = 0; k < active.length; k++) {
+              badgesHtml += '<span class="warning-badge">' + active[k] + '</span> ';
+            }
+            list.innerHTML = badgesHtml + ' IN EFFECT';
+          } else {
+            banner.classList.remove('active');
+          }
+        })
+        .catch(function(err) {
+          console.warn('warnsum fetch failed:', err);
+        });
+
+      // Fetch fnd (Forecast & Daily High/Low & Wind)
+      fetch(HKO_BASE + 'fnd')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.weatherForecast && data.weatherForecast.length > 0) {
+            var today = data.weatherForecast[0];
+            document.getElementById('high-temp').textContent = today.forecastMaxtemp.value + '°C';
+            document.getElementById('low-temp').textContent = today.forecastMintemp.value + '°C';
+
+            // Convert wind to km/h
+            if (today.forecastWind) {
+              var windKmH = convertBeaufortToKmH(today.forecastWind);
+              document.getElementById('wind-speed').textContent = windKmH;
+              
+              var dir = 'S to SE';
+              if (today.forecastWind.toLowerCase().indexOf('southwest') !== -1) dir = 'SW Winds';
+              else if (today.forecastWind.toLowerCase().indexOf('southeast') !== -1) dir = 'SE Winds';
+              else if (today.forecastWind.toLowerCase().indexOf('east') !== -1) dir = 'Easterly';
+              else if (today.forecastWind.toLowerCase().indexOf('north') !== -1) dir = 'Northerly';
+              document.getElementById('wind-desc').textContent = dir;
+            }
+
+            if (data.weatherForecast.length > 1) {
+              var tm = data.weatherForecast[1];
+              var weatherDesc = (tm.forecastWeather || tm.forecastForecast || 'Fine').replace(/\./g, '');
+              document.getElementById('tomorrow-forecast').textContent = weatherDesc + ' · ↓ ' + tm.forecastMintemp.value + '°C ↑ ' + tm.forecastMaxtemp.value + '°C';
+            }
+          }
+        })
+        .catch(function(err) {
+          console.warn('fnd fetch failed:', err);
+        });
     }
 
-    window.addEventListener('DOMContentLoaded', fetchTaiPoWeather);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fetchTaiPoWeather);
+    } else {
+      fetchTaiPoWeather();
+    }
   </script>
 </body>
 </html>
