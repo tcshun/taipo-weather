@@ -286,8 +286,8 @@
     <section class="columns-grid">
       <div class="news-column">
         <div class="column-title">COL. 1 · WIND</div>
-        <div id="wind-speed" class="column-value">6-19 km/h</div>
-        <div id="wind-desc" class="column-desc">S to SE Winds</div>
+        <div id="wind-speed" class="column-value">GUST 10 km/h</div>
+        <div id="wind-desc" class="column-desc">Tai Po Kau Station</div>
       </div>
       <div class="news-column">
         <div class="column-title">COL. 2 · HUMIDITY</div>
@@ -319,28 +319,8 @@
   <script>
     // Direct HKO Open Data API
     var HKO_BASE = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?lang=en&dataType=';
-
-    // Helper: Convert Beaufort Force to km/h Range
-    function convertBeaufortToKmH(forceStr) {
-      if (!forceStr) return '6-19 km/h';
-      var matches = forceStr.match(/\d+/g);
-      if (matches && matches.length >= 2) {
-        var f1 = parseInt(matches[0], 10);
-        var f2 = parseInt(matches[1], 10);
-        var minKm = f1 === 1 ? 1 : f1 === 2 ? 6 : f1 === 3 ? 12 : f1 === 4 ? 20 : f1 === 5 ? 29 : 39;
-        var maxKm = f2 === 1 ? 5 : f2 === 2 ? 11 : f2 === 3 ? 19 : f2 === 4 ? 28 : f2 === 5 ? 38 : 49;
-        return minKm + '-' + maxKm + ' km/h';
-      } else if (matches && matches.length === 1) {
-        var f = parseInt(matches[0], 10);
-        if (f === 1) return '1-5 km/h';
-        if (f === 2) return '6-11 km/h';
-        if (f === 3) return '12-19 km/h';
-        if (f === 4) return '20-28 km/h';
-        if (f === 5) return '29-38 km/h';
-        return '39+ km/h';
-      }
-      return '6-19 km/h';
-    }
+    var CSV_URL = 'https://data.weather.gov.hk/weatherAPI/hko_data/regional-weather/latest_10min_wind_en.csv';
+    var PROXY_CSV = 'https://corsproxy.io/?' + encodeURIComponent(CSV_URL);
 
     // Update Date and Printed Timestamp IMMEDIATELY on load (synchronously)
     function initDatesAndTimestamp() {
@@ -359,8 +339,71 @@
       document.getElementById('update-time').textContent = 'PRINTED: ' + printTimeStr;
     }
 
+    // Robust CSV Parser for Tai Po Kau Wind
+    function parseWindCSV(csvText) {
+      if (!csvText) return false;
+      var lines = csvText.split('\n');
+      var taiPoKauLine = null;
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('Tai Po Kau') !== -1) {
+          taiPoKauLine = lines[i].replace(/"/g, '');
+          break;
+        }
+      }
+      if (!taiPoKauLine) return false;
+
+      var parts = taiPoKauLine.split(',');
+      var numbers = [];
+      var dir = '';
+
+      for (var p = 0; p < parts.length; p++) {
+        var item = parts[p].trim();
+        if (/^\d+(\.\d+)?$/.test(item)) {
+          numbers.push(item);
+        } else if (/^(N|S|E|W|NE|NW|SE|SW|NNE|ENE|ESE|SSE|SSW|WSW|WNW|NNW|VARIABLE)$/i.test(item)) {
+          dir = item;
+        }
+      }
+
+      if (numbers.length > 0) {
+        var meanSpeed = numbers[0];
+        var maxGust = numbers.length >= 2 ? numbers[1] : numbers[0];
+        
+        if (maxGust) {
+          document.getElementById('wind-speed').textContent = 'GUST ' + maxGust + ' km/h';
+          document.getElementById('wind-desc').textContent = 'Tai Po Kau' + (meanSpeed ? (' · Mean ' + meanSpeed + 'km/h') : '');
+        } else if (meanSpeed) {
+          document.getElementById('wind-speed').textContent = meanSpeed + ' km/h';
+          document.getElementById('wind-desc').textContent = 'Tai Po Kau' + (dir ? (' · ' + dir) : '');
+        }
+        return true;
+      }
+      return false;
+    }
+
     function fetchTaiPoWeather() {
       initDatesAndTimestamp();
+
+      // Fetch Tai Po Kau Wind Data from CSV (Try Proxy first to avoid CORS error, fallback to direct)
+      fetch(PROXY_CSV)
+        .then(function(res) {
+          if (!res.ok) throw new Error('Proxy failed');
+          return res.text();
+        })
+        .then(function(csvText) {
+          parseWindCSV(csvText);
+        })
+        .catch(function() {
+          // Fallback to direct fetch if proxy fails
+          fetch(CSV_URL)
+            .then(function(res) { return res.text(); })
+            .then(function(csvText) {
+              parseWindCSV(csvText);
+            })
+            .catch(function(err) {
+              console.warn('Wind CSV fetch fallback warning:', err);
+            });
+        });
 
       // Fetch rhrread (Real-time weather)
       fetch(HKO_BASE + 'rhrread')
@@ -427,7 +470,7 @@
           console.warn('warnsum fetch failed:', err);
         });
 
-      // Fetch fnd (Forecast & Daily High/Low & Wind)
+      // Fetch fnd (Forecast & Daily High/Low)
       fetch(HKO_BASE + 'fnd')
         .then(function(res) { return res.json(); })
         .then(function(data) {
@@ -435,19 +478,6 @@
             var today = data.weatherForecast[0];
             document.getElementById('high-temp').textContent = today.forecastMaxtemp.value + '°C';
             document.getElementById('low-temp').textContent = today.forecastMintemp.value + '°C';
-
-            // Convert wind to km/h
-            if (today.forecastWind) {
-              var windKmH = convertBeaufortToKmH(today.forecastWind);
-              document.getElementById('wind-speed').textContent = windKmH;
-              
-              var dir = 'S to SE';
-              if (today.forecastWind.toLowerCase().indexOf('southwest') !== -1) dir = 'SW Winds';
-              else if (today.forecastWind.toLowerCase().indexOf('southeast') !== -1) dir = 'SE Winds';
-              else if (today.forecastWind.toLowerCase().indexOf('east') !== -1) dir = 'Easterly';
-              else if (today.forecastWind.toLowerCase().indexOf('north') !== -1) dir = 'Northerly';
-              document.getElementById('wind-desc').textContent = dir;
-            }
 
             if (data.weatherForecast.length > 1) {
               var tm = data.weatherForecast[1];
