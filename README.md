@@ -1,1 +1,1 @@
-https://github.com/tcshun/taipo-weather/index.html
+https://github.com/tcshun/taipo-weather
