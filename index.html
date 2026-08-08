@@ -14,9 +14,9 @@
       padding: 0;
     }
 
-    /* Optimized for reTerminal E1002 (800x480) E-Paper Display */
+    /* Optimized for reTerminal E1002 (900x480) E-Paper Display */
     html, body {
-      width: 800px;
+      width: 900px;
       height: 480px;
       overflow: hidden;
       background-color: #ffffff;
@@ -28,10 +28,10 @@
 
     .newspaper-card {
       background-color: #ffffff;
-      width: 800px;
+      width: 900px;
       height: 480px;
       border: 4px solid #000000;
-      padding: 10px 14px;
+      padding: 10px 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -51,25 +51,25 @@
       border-bottom: 2px solid #000000;
       padding-bottom: 2px;
       margin-bottom: 4px;
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
 
     .paper-title {
-      font-size: 2.7rem;
+      font-size: 3rem;
       font-weight: 900;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       text-transform: uppercase;
       line-height: 1;
       margin: 2px 0;
     }
 
     .paper-subtitle {
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 900;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
     }
 
@@ -81,7 +81,7 @@
       padding: 5px 12px;
       text-align: center;
       font-weight: 900;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       border: 2px solid #000000;
       text-transform: uppercase;
     }
@@ -90,14 +90,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .warning-badge {
       background-color: #ffffff;
       color: #000000;
       padding: 2px 8px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 900;
       border: 1px solid #ffffff;
     }
@@ -105,18 +105,18 @@
     /* Main Headline Section */
     .headline-section {
       border: 3.5px solid #000000;
-      padding: 8px 16px;
+      padding: 8px 18px;
       position: relative;
       margin: 2px 0;
     }
 
     .headline-label {
       position: absolute;
-      top: -12px;
-      left: 14px;
+      top: -13px;
+      left: 16px;
       background-color: #ffffff;
       padding: 0 8px;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 900;
       letter-spacing: 1px;
       border: 2px solid #000000;
@@ -132,8 +132,8 @@
     .location-display {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 1.5rem;
+      gap: 10px;
+      font-size: 1.65rem;
       font-weight: 900;
     }
 
@@ -144,13 +144,13 @@
     }
 
     .temp-number {
-      font-size: 5.2rem;
+      font-size: 5.5rem;
       font-weight: 900;
       line-height: 1;
     }
 
     .temp-unit {
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       font-weight: 900;
     }
 
@@ -159,21 +159,20 @@
       flex-direction: column;
       gap: 6px;
       border-left: 3.5px solid #000000;
-      padding-left: 18px;
+      padding-left: 20px;
     }
 
     .hl-item {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       font-weight: 900;
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
-    /* Three Columns Section */
     .columns-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
       border-top: 2.5px solid #000000;
       border-bottom: 2.5px solid #000000;
       padding: 8px 0;
@@ -181,7 +180,7 @@
 
     .news-column {
       border-right: 2.5px solid #000000;
-      padding-right: 12px;
+      padding-right: 10px;
     }
 
     .news-column:last-child {
@@ -190,7 +189,7 @@
     }
 
     .column-title {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 900;
       border-bottom: 2px solid #000000;
       padding-bottom: 2px;
@@ -200,13 +199,13 @@
     }
 
     .column-value {
-      font-size: 1.9rem;
+      font-size: 2rem;
       font-weight: 900;
       margin-bottom: 2px;
     }
 
     .column-desc {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 900;
       line-height: 1.2;
       color: #000000;
@@ -219,21 +218,21 @@
       align-items: center;
       border-top: 4px double #000000;
       padding-top: 6px;
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 900;
     }
 
     .tomorrow-box {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .tomorrow-badge {
       background-color: #000000;
       color: #ffffff;
       padding: 2px 8px;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 900;
       text-transform: uppercase;
     }
@@ -263,7 +262,7 @@
       <div class="headline-label">HEADLINE · TAI PO LIVE OBSERVATION</div>
       <div class="main-temp-grid">
         <div class="location-display">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
             <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
@@ -282,22 +281,27 @@
       </div>
     </section>
 
-    <!-- Three Columns -->
+    <!-- Four Columns Grid -->
     <section class="columns-grid">
       <div class="news-column">
-        <div class="column-title">COL. 1 · WIND REPORT</div>
-        <div id="wind-speed" class="column-value">LIGHT 2-4 km/h</div>
-        <div class="column-desc">Tolo Harbour Station</div>
+        <div class="column-title">COL. 1 · WIND</div>
+        <div id="wind-speed" class="column-value">2-4 km/h</div>
+        <div class="column-desc">Tolo Station</div>
       </div>
       <div class="news-column">
         <div class="column-title">COL. 2 · HUMIDITY</div>
         <div id="humidity-val" class="column-value">63%</div>
-        <div class="column-desc">Tai Po Relative Humidity</div>
+        <div class="column-desc">Tai Po RH</div>
       </div>
       <div class="news-column">
         <div class="column-title">COL. 3 · RAINFALL</div>
         <div id="rainfall-val" class="column-value">0.0 mm</div>
-        <div id="rain-desc" class="column-desc">No Rainfall in Tai Po</div>
+        <div id="rain-desc" class="column-desc">No Rainfall</div>
+      </div>
+      <div class="news-column">
+        <div class="column-title">COL. 4 · UV INDEX</div>
+        <div id="uv-val" class="column-value">0.0 LOW</div>
+        <div class="column-desc">HKO Solar Station</div>
       </div>
     </section>
 
@@ -330,7 +334,7 @@
       
       let apiSuccess = false;
 
-      // 1. Fetch Real-Time Weather in English (lang=en)
+      // 1. Fetch Real-Time Weather & UV Index in English (lang=en)
       try {
         const url = PROXY + encodeURIComponent('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=en');
         const res = await fetch(url);
@@ -351,8 +355,17 @@
           if (tpR) {
             const r = tpR.max || 0;
             document.getElementById('rainfall-val').textContent = r.toFixed(1) + ' mm';
-            document.getElementById('rain-desc').textContent = r > 0 ? 'Rain Recorded' : 'No Rainfall in Tai Po';
+            document.getElementById('rain-desc').textContent = r > 0 ? 'Rain Recorded' : 'No Rainfall';
           }
+        }
+        // Process UV Index
+        if (data.uvindex && data.uvindex.data && data.uvindex.data.length > 0) {
+          const uv = data.uvindex.data[0];
+          const val = uv.value !== undefined ? uv.value : 0;
+          const desc = uv.desc ? ` ${uv.desc.toUpperCase()}` : '';
+          document.getElementById('uv-val').textContent = `${val}${desc}`;
+        } else {
+          document.getElementById('uv-val').textContent = '0.0 LOW';
         }
       } catch (e) {
         console.warn('rhrread API error:', e);
@@ -398,13 +411,14 @@
         console.warn('fnd API error:', e);
       }
 
-      // Fallback data for offline / local desktop execution
+      // Fallback data for offline / desktop execution
       if (!apiSuccess) {
         document.getElementById('temp-val').textContent = '36.0';
         document.getElementById('high-temp').textContent = '36°C';
         document.getElementById('low-temp').textContent = '29°C';
         document.getElementById('humidity-val').textContent = '63%';
-        document.getElementById('tomorrow-forecast').textContent = 'Fine and very hot · ↓ 28°C ↑ 35°C';
+        document.getElementById('uv-val').textContent = '8.0 HIGH';
+        document.getElementById('tomorrow-forecast').textContent = 'Fine & very hot · ↓ 28°C ↑ 35°C';
       }
 
       // Update Timestamp
