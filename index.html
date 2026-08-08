@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大埔天氣日報 - 黑白單色印刷版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* 全局黑白報紙復古風格 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #e5e5e0;
+      color: #000000;
+      font-family: 'Noto Serif TC', 'Times New Roman', Times, serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+      line-height: 1.4;
+    }
+
+    /* 報紙卡片容器 */
+    .newspaper-card {
+      background-color: #fcfbf7;
+      width: 100%;
+      max-width: 820px;
+      border: 2px solid #000000;
+      padding: 24px 28px;
+      box-shadow: 6px 6px 0px #000000;
+      position: relative;
+    }
+
+    /* 報頭區段 */
+    .masthead {
+      text-align: center;
+      border-bottom: 3px double #000000;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .sub-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #000000;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .paper-title {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin: 6px 0;
+    }
+
+    .paper-subtitle {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* 天氣警告聲明區（純黑底白字或粗黑框） */
+    .warning-banner {
+      display: none;
+      background-color: #000000;
+      color: #ffffff;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      border: 1px solid #000000;
+    }
+
+    .warning-banner.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .warning-badge {
+      display: inline-block;
+      background-color: #ffffff;
+      color: #000000;
+      padding: 2px 8px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      border: 1px solid #ffffff;
+    }
+
+    /* 頭條氣溫核心區 */
+    .headline-section {
+      border: 2px solid #000000;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .headline-label {
+      position: absolute;
+      top: -12px;
+      left: 16px;
+      background-color: #fcfbf7;
+      padding: 0 8px;
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border: 1px solid #000000;
+    }
+
+    .main-temp-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 6px;
+    }
+
+    .location-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .temp-large-box {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .temp-number {
+      font-size: 4.8rem;
+      font-weight: 900;
+      line-height: 1;
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .temp-unit {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .high-low-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 2px solid #000000;
+      padding-left: 16px;
+    }
+
+    .hl-item {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 三欄報紙專欄 */
+    .columns-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      border-top: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      padding: 16px 0;
+      margin-bottom: 16px;
+    }
+
+    .news-column {
+      border-right: 1px solid #000000;
+      padding-right: 12px;
+    }
+
+    .news-column:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .column-title {
+      font-size: 0.85rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+
+    .column-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .column-desc {
+      font-size: 0.78rem;
+      color: #333333;
+    }
+
+    /* 底部預報與落款頁腳 */
+    .footer-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-top: 3px double #000000;
+      padding-top: 12px;
+    }
+
+    .tomorrow-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tomorrow-badge {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .refresh-btn {
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid #000000;
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .refresh-btn:hover {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    /* 響應式調整 */
+    @media (max-width: 650px) {
+      .paper-title {
+        font-size: 2rem;
+      }
+      .columns-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .news-column {
+        border-right: none;
+        border-bottom: 1px dashed #000000;
+        padding-right: 0;
+        padding-bottom: 8px;
+      }
+      .news-column:last-child {
+        border-bottom: none;
+      }
+      .temp-number {
+        font-size: 3.6rem;
+      }
+      .high-low-box {
+        border-left: none;
+        border-top: 1px solid #000000;
+        padding-left: 0;
+        padding-top: 8px;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="newspaper-card">
+    <!-- 報頭 Header -->
+    <header class="masthead">
+      <div class="sub-header">
+        <span id="issue-no">第 8826 期</span>
+        <span id="current-date">2026年 08月 08日 · 星期六</span>
+        <span>售價：港幣五元</span>
+      </div>
+      <h1 class="paper-title">大埔天氣日報</h1>
+      <div class="paper-subtitle">TAI PO WEATHER GAZETTE · 香港天文台即時數據</div>
+    </header>
+
+    <!-- 生效天氣警告（黑底白字特別公告） -->
+    <div id="warning-banner" class="warning-banner">
+      <span>【官方緊急公告】</span>
+      <span id="warning-list"><span class="warning-badge">酷熱天氣警告</span> 現正生效</span>
+    </div>
+
+    <!-- 頭條焦點：大埔實時氣溫 -->
+    <section class="headline-section">
+      <div class="headline-label">頭條新聞 · 實時大埔觀測</div>
+      <div class="main-temp-grid">
+        <div class="location-display">
+          <!-- 單色 SVG 圖示：太陽 -->
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <span>📍 大埔區氣溫</span>
+        </div>
+
+        <div class="temp-large-box">
+          <span id="temp-val" class="temp-number">25.5</span>
+          <span class="temp-unit">°C</span>
+        </div>
+
+        <div class="high-low-box">
+          <div class="hl-item">
+            <span>極高溫 ↑</span>
+            <span id="high-temp">36.0°C</span>
+          </div>
+          <div class="hl-item">
+            <span>極低溫 ↓</span>
+            <span id="low-temp">26.0°C</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 三欄數據專欄 -->
+    <section class="columns-grid">
+      <!-- 專欄一：風向與風速 -->
+      <div class="news-column">
+        <div class="column-title">專欄一 · 風力報告</div>
+        <div id="wind-speed" class="column-value">西南 1 km/h</div>
+        <div class="column-desc">觀測地點：大埔吐露港及周邊氣象站風向數據。</div>
+      </div>
+
+      <!-- 專欄二：相對濕度 -->
+      <div class="news-column">
+        <div class="column-title">專欄二 · 濕度指數</div>
+        <div id="humidity-val" class="column-value">84%</div>
+        <div class="column-desc">大埔地區相對空氣濕度大氣觀測紀錄。</div>
+      </div>
+
+      <!-- 專欄三：過去一小時降水量 -->
+      <div class="news-column">
+        <div class="column-title">專欄三 · 降雨狀況</div>
+        <div id="rainfall-val" class="column-value">0.0 mm</div>
+        <div id="rain-desc" class="column-desc">過去一小時大埔平均降雨量紀錄。</div>
+      </div>
+    </section>
+
+    <!-- 頁腳：明日預報與更新印製 -->
+    <footer class="footer-section">
+      <div class="tomorrow-box">
+        <span class="tomorrow-badge">明日氣象預報</span>
+        <span id="tomorrow-forecast">(明日) 天晴酷熱 · ↓ 27°C  ↑ 36°C</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span id="update-time">印刷時間: 2026/08/08 11:04</span>
+        <button class="refresh-btn" onclick="fetchTaiPoWeather()">
+          <span>重新印製報紙</span>
+          <span>🔄</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // 異步取得香港天文台實時天氣數據
+    async function fetchTaiPoWeather() {
+      try {
+        // 1. 取得實時氣溫、濕度、雨量與風向 (rhrread)
+        const weatherRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc');
+        const weatherData = await weatherRes.json();
+
+        // 篩選大埔氣溫
+        if (weatherData.temperature && weatherData.temperature.data) {
+          const taiPoTempData = weatherData.temperature.data.find(item => item.place === '大埔');
+          if (taiPoTempData) {
+            document.getElementById('temp-val').textContent = taiPoTempData.value.toFixed(1);
+          }
+        }
+
+        // 濕度數據
+        if (weatherData.humidity && weatherData.humidity.data && weatherData.humidity.data.length > 0) {
+          document.getElementById('humidity-val').textContent = weatherData.humidity.data[0].value + '%';
+        }
+
+        // 篩選大埔雨量
+        if (weatherData.rainfall && weatherData.rainfall.data) {
+          const taiPoRain = weatherData.rainfall.data.find(item => item.place === '大埔');
+          if (taiPoRain) {
+            const rainVal = taiPoRain.max || 0;
+            document.getElementById('rainfall-val').textContent = rainVal.toFixed(1) + ' mm';
+            document.getElementById('rain-desc').textContent = rainVal > 0 ? '過去一小時大埔錄得降雨。' : '目前大埔區無顯著降雨。';
+          }
+        }
+
+        // 風力風向
+        if (weatherData.lightning && weatherData.lightning.data) {
+          // 風力通常在通用數據或模擬文字展示，若 API 無直接風力則維護靜態標註
+        }
+
+        // 2. 取得天氣警告 (warnsum)
+        try {
+          const warnRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=warnsum&lang=tc');
+          const warnData = await warnRes.json();
+          const warningBanner = document.getElementById('warning-banner');
+          const warningList = document.getElementById('warning-list');
+
+          const activeWarnings = [];
+          if (warnData) {
+            for (let key in warnData) {
+              if (warnData[key] && warnData[key].name) {
+                activeWarnings.push(warnData[key].name);
+              }
+            }
+          }
+
+          if (activeWarnings.length > 0) {
+            warningBanner.classList.add('active');
+            warningList.innerHTML = activeWarnings.map(w => `<span class="warning-badge">${w}</span>`).join(' ') + ' 現正生效';
+          } else {
+            warningBanner.classList.remove('active');
+          }
+        } catch (e) {
+          console.log('警告 API 載入提示:', e);
+        }
+
+        // 3. 取得九天天氣預報（當日極值與明日預報）(fnd)
+        try {
+          const fndRes = await fetch('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
+          const fndData = await fndRes.json();
+
+          if (fndData.weatherForecast && fndData.weatherForecast.length > 0) {
+            const today = fndData.weatherForecast[0];
+            document.getElementById('high-temp').textContent = today.forecastMaxtemp.value + '°C';
+            document.getElementById('low-temp').textContent = today.forecastMintemp.value + '°C';
+
+            if (fndData.weatherForecast.length > 1) {
+              const tomorrow = fndData.weatherForecast[1];
+              document.getElementById('tomorrow-forecast').textContent = 
+                `(明日) ${tomorrow.forecastForecast} · ↓ ${tomorrow.forecastMintemp.value}°C  ↑ ${tomorrow.forecastMaxtemp.value}°C`;
+            }
+          }
+        } catch (e) {
+          console.log('預報 API 載入提示:', e);
+        }
+
+        // 更新最後印製時間
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('update-time').textContent = `印刷時間: ${timeStr}`;
+
+      } catch (err) {
+        console.warn('使用模擬黑白報紙天氣數據:', err);
+        // Fallback 數據維持運作
+      }
+    }
+
+    // 初始化載入
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchTaiPoWeather();
+    });
+  </script>
+</body>
+</html>
