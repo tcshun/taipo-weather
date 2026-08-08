@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大埔天氣日報 - E1002 電子紙極致清晰版</title>
+  <title>大埔天氣日報 - E1002 超清晰滿版</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
@@ -14,14 +14,14 @@
       padding: 0;
     }
 
-    /* 嚴格針對 reTerminal E1002 (800x480) 電子紙畫面調校 */
+    /* 針對 reTerminal E1002 (800x480) 螢幕100%滿版無邊界調校 */
     html, body {
       width: 800px;
       height: 480px;
       overflow: hidden;
       background-color: #ffffff;
       color: #000000;
-      font-family: 'Noto Serif TC', 'Times New Roman', serif;
+      font-family: 'Noto Serif TC', 'Microsoft JhengHei', serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -31,7 +31,7 @@
       width: 800px;
       height: 480px;
       border: 4px solid #000000;
-      padding: 18px 24px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -41,7 +41,7 @@
     .masthead {
       text-align: center;
       border-bottom: 4px double #000000;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
     }
 
     .sub-header {
@@ -49,23 +49,23 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid #000000;
-      padding-bottom: 4px;
-      margin-bottom: 6px;
-      font-size: 1.05rem;
+      padding-bottom: 2px;
+      margin-bottom: 4px;
+      font-size: 1.15rem;
       font-weight: 900;
     }
 
     .paper-title {
-      font-size: 2.8rem;
+      font-size: 3.1rem;
       font-weight: 900;
       letter-spacing: 4px;
       text-transform: uppercase;
       line-height: 1;
-      margin: 4px 0;
+      margin: 2px 0;
     }
 
     .paper-subtitle {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 900;
       letter-spacing: 2px;
     }
@@ -75,10 +75,10 @@
       display: none;
       background-color: #000000;
       color: #ffffff;
-      padding: 6px 12px;
+      padding: 5px 12px;
       text-align: center;
       font-weight: 900;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       border: 2px solid #000000;
     }
 
@@ -93,29 +93,29 @@
       background-color: #ffffff;
       color: #000000;
       padding: 2px 8px;
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 900;
       border: 1px solid #ffffff;
     }
 
     /* 頭條氣溫核心區 */
     .headline-section {
-      border: 3px solid #000000;
-      padding: 12px 20px;
+      border: 3.5px solid #000000;
+      padding: 8px 16px;
       position: relative;
-      margin: 4px 0;
+      margin: 2px 0;
     }
 
     .headline-label {
       position: absolute;
       top: -12px;
-      left: 16px;
+      left: 14px;
       background-color: #ffffff;
       padding: 0 8px;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 900;
       letter-spacing: 1px;
-      border: 1.5px solid #000000;
+      border: 2px solid #000000;
     }
 
     .main-temp-grid {
@@ -128,7 +128,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 1.5rem;
+      font-size: 1.65rem;
       font-weight: 900;
     }
 
@@ -139,13 +139,13 @@
     }
 
     .temp-number {
-      font-size: 4.8rem;
+      font-size: 5.2rem;
       font-weight: 900;
       line-height: 1;
     }
 
     .temp-unit {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 900;
     }
 
@@ -153,12 +153,12 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      border-left: 3px solid #000000;
+      border-left: 3.5px solid #000000;
       padding-left: 18px;
     }
 
     .hl-item {
-      font-size: 1.15rem;
+      font-size: 1.35rem;
       font-weight: 900;
       display: flex;
       gap: 10px;
@@ -168,14 +168,14 @@
     .columns-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      border-top: 2px solid #000000;
-      border-bottom: 2px solid #000000;
-      padding: 10px 0;
+      gap: 14px;
+      border-top: 2.5px solid #000000;
+      border-bottom: 2.5px solid #000000;
+      padding: 8px 0;
     }
 
     .news-column {
-      border-right: 2px solid #000000;
+      border-right: 2.5px solid #000000;
       padding-right: 12px;
     }
 
@@ -185,24 +185,24 @@
     }
 
     .column-title {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       font-weight: 900;
       border-bottom: 2px solid #000000;
-      padding-bottom: 4px;
-      margin-bottom: 6px;
+      padding-bottom: 2px;
+      margin-bottom: 4px;
       letter-spacing: 1px;
     }
 
     .column-value {
-      font-size: 1.8rem;
+      font-size: 2.1rem;
       font-weight: 900;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .column-desc {
-      font-size: 1rem;
+      font-size: 1.15rem;
       font-weight: 900;
-      line-height: 1.3;
+      line-height: 1.2;
       color: #000000;
     }
 
@@ -212,22 +212,22 @@
       justify-content: space-between;
       align-items: center;
       border-top: 4px double #000000;
-      padding-top: 8px;
-      font-size: 1.05rem;
+      padding-top: 6px;
+      font-size: 1.15rem;
       font-weight: 900;
     }
 
     .tomorrow-box {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .tomorrow-badge {
       background-color: #000000;
       color: #ffffff;
       padding: 2px 8px;
-      font-size: 0.95rem;
+      font-size: 1.05rem;
       font-weight: 900;
     }
   </style>
@@ -256,7 +256,7 @@
       <div class="headline-label">頭條新聞 · 實時大埔觀測</div>
       <div class="main-temp-grid">
         <div class="location-display">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
             <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
@@ -280,7 +280,7 @@
       <div class="news-column">
         <div class="column-title">專欄一 · 風力報告</div>
         <div id="wind-speed" class="column-value">微風 2-4 km/h</div>
-        <div class="column-desc">大埔吐露港氣象站</div>
+        <div class="column-desc">大埔吐露港觀測站</div>
       </div>
       <div class="news-column">
         <div class="column-title">專欄二 · 濕度指數</div>
@@ -369,7 +369,7 @@
         console.warn('warnsum API 連線警告:', e);
       }
 
-      // 3. 取得極值與明日預報 (fnd) - 修復 forecastWeather 欄位 bug
+      // 3. 取得極值與明日預報 (fnd)
       try {
         const url = PROXY + encodeURIComponent('https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=tc');
         const res = await fetch(url);
@@ -380,7 +380,6 @@
           
           if (data.weatherForecast.length > 1) {
             const tm = data.weatherForecast[1];
-            // 香港天文台 API 的天氣概況欄位為 forecastWeather
             const weatherDesc = (tm.forecastWeather || tm.forecastForecast || '大致天晴').replace(/。/g, '');
             document.getElementById('tomorrow-forecast').textContent = `${weatherDesc} · ↓ ${tm.forecastMintemp.value}°C ↑ ${tm.forecastMaxtemp.value}°C`;
           }
