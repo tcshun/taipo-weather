@@ -252,7 +252,7 @@
       <div class="paper-subtitle">TAI PO GAZETTE · HONG KONG OBSERVATORY LIVE DATA</div>
     </header>
 
-    <!-- Weather Warnings Banner -->
+    <!-- Weather Warning Banner -->
     <div id="warning-banner" class="warning-banner">
       <span>【OFFICIAL NOTICE】</span>
       <span id="warning-list"><span class="warning-badge">NO WARNINGS</span></span>
@@ -286,8 +286,8 @@
     <section class="columns-grid">
       <div class="news-column">
         <div class="column-title">COL. 1 · WIND</div>
-        <div id="wind-speed" class="column-value">GUST 10 km/h</div>
-        <div id="wind-desc" class="column-desc">Tai Po Kau Station</div>
+        <div id="wind-speed" class="column-value">GUST 13 km/h SE</div>
+        <div id="wind-desc" class="column-desc">Tai Po Kau · Mean 8 km/h</div>
       </div>
       <div class="news-column">
         <div class="column-title">COL. 2 · HUMIDITY</div>
@@ -339,44 +339,46 @@
       document.getElementById('update-time').textContent = 'PRINTED: ' + printTimeStr;
     }
 
-    // Robust CSV Parser for Tai Po Kau Wind
+    // Precise CSV Parser for Tai Po Kau Wind Speed, Direction and Gust
     function parseWindCSV(csvText) {
       if (!csvText) return false;
       var lines = csvText.split('\n');
-      var taiPoKauLine = null;
       for (var i = 0; i < lines.length; i++) {
-        if (lines[i].indexOf('Tai Po Kau') !== -1) {
-          taiPoKauLine = lines[i].replace(/"/g, '');
-          break;
-        }
-      }
-      if (!taiPoKauLine) return false;
+        var line = lines[i].replace(/"/g, '').trim();
+        if (line.indexOf('Tai Po Kau') !== -1 || line.indexOf('大埔滘') !== -1) {
+          var parts = line.split(',');
+          if (parts.length >= 4) {
+            var dir = '';
+            var meanSpeed = '';
+            var maxGust = '';
+            
+            // Search for direction string inside parts (e.g. SE, ESE, NNE, NW, CALM)
+            for (var j = 1; j < parts.length; j++) {
+              var p = parts[j].trim();
+              if (/^(N|S|E|W|NE|NW|SE|SW|ENE|ESE|NNE|NNW|SSE|SSW|CALM|VRB|C)$/i.test(p)) {
+                dir = p;
+                if (parts[j+1]) meanSpeed = parts[j+1].trim();
+                if (parts[j+2]) maxGust = parts[j+2].trim();
+                break;
+              }
+            }
 
-      var parts = taiPoKauLine.split(',');
-      var numbers = [];
-      var dir = '';
-
-      for (var p = 0; p < parts.length; p++) {
-        var item = parts[p].trim();
-        if (/^\d+(\.\d+)?$/.test(item)) {
-          numbers.push(item);
-        } else if (/^(N|S|E|W|NE|NW|SE|SW|NNE|ENE|ESE|SSE|SSW|WSW|WNW|NNW|VARIABLE)$/i.test(item)) {
-          dir = item;
+            // Fallback column positions if regex loop didn't match
+            if (!maxGust && parts.length >= 5) {
+              dir = parts[2].trim();
+              meanSpeed = parts[3].trim();
+              maxGust = parts[4].trim();
+            }
+            
+            if (maxGust && !isNaN(parseFloat(maxGust))) {
+              var gustVal = parseFloat(maxGust).toFixed(0);
+              var dirStr = dir ? (' ' + dir) : '';
+              document.getElementById('wind-speed').textContent = 'GUST ' + gustVal + ' km/h' + dirStr;
+              document.getElementById('wind-desc').textContent = 'Tai Po Kau' + (meanSpeed ? (' · Mean ' + meanSpeed + ' km/h') : '');
+              return true;
+            }
+          }
         }
-      }
-
-      if (numbers.length > 0) {
-        var meanSpeed = numbers[0];
-        var maxGust = numbers.length >= 2 ? numbers[1] : numbers[0];
-        
-        if (maxGust) {
-          document.getElementById('wind-speed').textContent = 'GUST ' + maxGust + ' km/h';
-          document.getElementById('wind-desc').textContent = 'Tai Po Kau' + (meanSpeed ? (' · Mean ' + meanSpeed + 'km/h') : '');
-        } else if (meanSpeed) {
-          document.getElementById('wind-speed').textContent = meanSpeed + ' km/h';
-          document.getElementById('wind-desc').textContent = 'Tai Po Kau' + (dir ? (' · ' + dir) : '');
-        }
-        return true;
       }
       return false;
     }
@@ -384,7 +386,7 @@
     function fetchTaiPoWeather() {
       initDatesAndTimestamp();
 
-      // Fetch Tai Po Kau Wind Data from CSV (Try Proxy first to avoid CORS error, fallback to direct)
+      // Fetch Tai Po Kau Wind Data from CSV (Try Proxy first, fallback to direct)
       fetch(PROXY_CSV)
         .then(function(res) {
           if (!res.ok) throw new Error('Proxy failed');
